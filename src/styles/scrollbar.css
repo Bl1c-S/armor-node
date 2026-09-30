@@ -1,0 +1,33 @@
+/* ==========================================================================
+   SCROLLBAR & BASE BEHAVIOR
+   ========================================================================== */
+
+/* Smooth document scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Cross-browser scrollbars (Firefox & standards) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) var(--background);
+}
+
+/* Custom scrollbars utilizing theme variables (WebKit / Chromium / Safari) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}

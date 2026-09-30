@@ -1,0 +1,195 @@
+/* ==========================================================================
+   ARMORNODE THEME SYSTEM
+   Palette specification:
+   - Primary Dark / Background: #2C1D11
+   - Background / Surface:      #F5EBE6
+   - Secondary / Text:          #4E3629
+   - Accent / Brand Pop:        #C68B59
+   - Pure White:                #FFFFFF
+   - Tech Accent:               #4E9481
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. GLOBAL DESIGN TOKENS (Shape, Spacing & Layout)
+   -------------------------------------------------------------------------- */
+:root {
+  /* Global Base Radius - change this ONE value to update all shapes */
+  --radius: 0.875rem;                 /* 14px base radius */
+
+  /* Global Page & Section Spacing */
+  --container-max-w: 80rem;           /* 1280px */
+  --page-px: clamp(1rem, 4vw, 1.5rem);                  /* Responsive horizontal page gutter */
+  --section-py: clamp(3rem, 7vw, 5rem);                 /* Responsive vertical section gap */
+}
+
+/* --------------------------------------------------------------------------
+   2. LIGHT PALETTE (Base Tokens)
+   -------------------------------------------------------------------------- */
+:root {
+  /* Surfaces */
+  --background: #F5EBE6;              /* Warm cream / surface */
+  --card: #FFFFFF;                    /* Pure white cards */
+  --muted: #EDE1DA;                   /* Soft warm neutral */
+
+  /* Text & Typography */
+  --foreground: #2C1D11;              /* Primary dark espresso text */
+  --muted-foreground: #6B5244;        /* Secondary legible mocha text */
+
+  /* Brand / Pop Accent (#C68B59) */
+  --primary: #C68B59;
+  --primary-hover: #B57948;
+  --primary-foreground: #FFFFFF;
+
+  /* Secondary (#4E3629) */
+  --secondary: #4E3629;
+  --secondary-foreground: #F5EBE6;
+
+  /* Tech Accent (#4E9481) */
+  --tech-accent: #4E9481;
+  --tech-accent-foreground: #FFFFFF;
+
+  /* Borders & Inputs */
+  --border: #DFD1C8;
+  --card-border: #E4D7CF;
+  --input: #FFFFFF;
+  --ring: #C68B59;
+
+  /* Badges & Tags */
+  --badge-bg: rgba(198, 139, 89, 0.12);
+  --badge-text: #965F32;
+  --badge-border: rgba(198, 139, 89, 0.35);
+
+  --tech-badge-bg: rgba(78, 148, 129, 0.12);
+  --tech-badge-text: #2E6B5B;
+  --tech-badge-border: rgba(78, 148, 129, 0.35);
+}
+
+/* --------------------------------------------------------------------------
+   3. SYSTEM PREFERENCE (Dark when OS prefers dark, unless forced .light)
+   -------------------------------------------------------------------------- */
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    /* Surfaces */
+    --background: #2C1D11;            /* Primary dark espresso */
+    --card: #372518;                  /* Warm dark elevated surface */
+    --muted: #3D291C;
+
+    /* Text & Typography */
+    --foreground: #F5EBE6;            /* Warm cream text */
+    --muted-foreground: #C9B8AC;      /* Legible warm muted text */
+
+    /* Brand / Pop Accent */
+    --primary: #C68B59;
+    --primary-hover: #D99B6A;
+    --primary-foreground: #FFFFFF;
+
+    /* Secondary */
+    --secondary: #4E3629;
+    --secondary-foreground: #F5EBE6;
+
+    /* Tech Accent */
+    --tech-accent: #4E9481;
+    --tech-accent-foreground: #FFFFFF;
+
+    /* Borders & Inputs */
+    --border: #4E3629;
+    --card-border: #4E3629;
+    --input: #23160D;
+    --ring: #C68B59;
+
+    /* Badges & Tags */
+    --badge-bg: rgba(198, 139, 89, 0.18);
+    --badge-text: #E5A876;
+    --badge-border: rgba(198, 139, 89, 0.4);
+
+    --tech-badge-bg: rgba(78, 148, 129, 0.18);
+    --tech-badge-text: #6DC2AC;
+    --tech-badge-border: rgba(78, 148, 129, 0.4);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   4. EXPLICIT DARK THEME (Forced .dark class)
+   -------------------------------------------------------------------------- */
+:root.dark,
+.dark {
+  /* Surfaces */
+  --background: #2C1D11;
+  --card: #372518;
+  --muted: #3D291C;
+
+  /* Text & Typography */
+  --foreground: #F5EBE6;
+  --muted-foreground: #C9B8AC;
+
+  /* Brand / Pop Accent */
+  --primary: #C68B59;
+  --primary-hover: #D99B6A;
+  --primary-foreground: #FFFFFF;
+
+  /* Secondary */
+  --secondary: #4E3629;
+  --secondary-foreground: #F5EBE6;
+
+  /* Tech Accent */
+  --tech-accent: #4E9481;
+  --tech-accent-foreground: #FFFFFF;
+
+  /* Borders & Inputs */
+  --border: #4E3629;
+  --card-border: #4E3629;
+  --input: #23160D;
+  --ring: #C68B59;
+
+  /* Badges & Tags */
+  --badge-bg: rgba(198, 139, 89, 0.18);
+  --badge-text: #E5A876;
+  --badge-border: rgba(198, 139, 89, 0.4);
+
+  --tech-badge-bg: rgba(78, 148, 129, 0.18);
+  --tech-badge-text: #6DC2AC;
+  --tech-badge-border: rgba(78, 148, 129, 0.4);
+}
+
+/* --------------------------------------------------------------------------
+   5. EXPLICIT LIGHT THEME (Forced .light class)
+   -------------------------------------------------------------------------- */
+:root.light,
+.light {
+  /* Surfaces */
+  --background: #F5EBE6;
+  --card: #FFFFFF;
+  --muted: #EDE1DA;
+
+  /* Text & Typography */
+  --foreground: #2C1D11;
+  --muted-foreground: #6B5244;
+
+  /* Brand / Pop Accent */
+  --primary: #C68B59;
+  --primary-hover: #B57948;
+  --primary-foreground: #FFFFFF;
+
+  /* Secondary */
+  --secondary: #4E3629;
+  --secondary-foreground: #F5EBE6;
+
+  /* Tech Accent */
+  --tech-accent: #4E9481;
+  --tech-accent-foreground: #FFFFFF;
+
+  /* Borders & Inputs */
+  --border: #DFD1C8;
+  --card-border: #E4D7CF;
+  --input: #FFFFFF;
+  --ring: #C68B59;
+
+  /* Badges & Tags */
+  --badge-bg: rgba(198, 139, 89, 0.12);
+  --badge-text: #965F32;
+  --badge-border: rgba(198, 139, 89, 0.35);
+
+  --tech-badge-bg: rgba(78, 148, 129, 0.12);
+  --tech-badge-text: #2E6B5B;
+  --tech-badge-border: rgba(78, 148, 129, 0.35);
+}
