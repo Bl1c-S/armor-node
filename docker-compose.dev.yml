@@ -1,0 +1,11 @@
+# Development override: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+services:
+  frontend:
+    command: npm run dev
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:8080
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
