@@ -1,0 +1,36 @@
+using NpgsqlTypes;
+using Serilog;
+using Serilog.Sinks.PostgreSQL;
+
+namespace Infrastructure.Logger;
+
+public class ArmorLoggerBuilder(string connectionString)
+{
+    public Serilog.Core.Logger Build()
+    {
+        var columnWriters = new Dictionary<string, ColumnWriterBase>
+        {
+            ["message"] = new RenderedMessageColumnWriter(),
+            ["level"] = new LevelColumnWriter(true, NpgsqlDbType.Varchar),
+            ["timestamp"] = new TimestampColumnWriter(),
+            ["exception"] = new ExceptionColumnWriter(),
+            ["properties"] = new LogEventSerializedColumnWriter()
+        };
+        
+        Serilog.Debugging.SelfLog.Enable(Console.Error);
+        
+        var logger = new LoggerConfiguration()
+            .MinimumLevel.Information()
+            .Enrich.WithProperty("Application", "API")
+            .WriteTo.PostgreSQL(
+                connectionString: connectionString,
+                tableName: "logs",
+                columnOptions: columnWriters,
+                needAutoCreateTable: true)
+            .WriteTo.Console()
+            .CreateLogger();
+        
+        Log.Logger = logger;
+        return logger;
+    }
+}
