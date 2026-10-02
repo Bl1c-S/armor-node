@@ -5,8 +5,13 @@
     "dev": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build",
     "up": "docker compose up --build",
     "down": "docker compose down",
-    "test:e2e": "npm --prefix frontend run test:e2e",
-    "test:e2e:ui": "npm --prefix frontend run test:e2e:ui",
-    "test:e2e:headed": "npm --prefix frontend run test:e2e:headed"
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^26.6.4",
+    "typescript": "^7.0.2"
   }
 }
