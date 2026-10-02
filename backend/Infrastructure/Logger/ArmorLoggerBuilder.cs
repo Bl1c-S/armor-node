@@ -16,9 +16,7 @@ public class ArmorLoggerBuilder(string connectionString)
             ["exception"] = new ExceptionColumnWriter(),
             ["properties"] = new LogEventSerializedColumnWriter()
         };
-        
-        Serilog.Debugging.SelfLog.Enable(Console.Error);
-        
+
         var logger = new LoggerConfiguration()
             .MinimumLevel.Information()
             .Enrich.WithProperty("Application", "API")

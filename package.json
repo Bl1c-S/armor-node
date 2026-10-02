@@ -2,11 +2,9 @@
   "name": "armor-node",
   "private": true,
   "scripts": {
-    "dev": "npx concurrently -n \"BACKEND,FRONTEND\" -c \"cyan,magenta\" \"dotnet watch --project backend/API/API.csproj\" \"npm run dev --prefix frontend\"",
-    "dev:frontend": "npm run dev --prefix frontend",
-    "dev:backend": "dotnet watch --project backend/API/API.csproj",
-    "build:frontend": "npm run build --prefix frontend",
-    "build:backend": "dotnet build ArmorNode.slnx",
+    "dev": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build",
+    "up": "docker compose up --build",
+    "down": "docker compose down",
     "test:e2e": "npm --prefix frontend run test:e2e",
     "test:e2e:ui": "npm --prefix frontend run test:e2e:ui",
     "test:e2e:headed": "npm --prefix frontend run test:e2e:headed"
