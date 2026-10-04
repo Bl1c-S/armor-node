@@ -25,6 +25,10 @@ test.describe('Global Header, Theme & Language Switcher', () => {
       await expect(header.languageToggleBtn).toHaveAttribute('aria-haspopup', 'menu');
       await expect(header.languageToggleBtn).toHaveAttribute('aria-expanded', 'false');
     });
+
+    test('should default to system theme', async () => {
+      await expect(header.themeToggleBtn).toContainText(/system/i);
+    });
   });
 
   test.describe('Theme Menu Interactivity & Switching', () => {
@@ -54,26 +58,26 @@ test.describe('Global Header, Theme & Language Switcher', () => {
       await expect(header.themeToggleBtn).toHaveAttribute('aria-expanded', 'false');
     });
 
-    test('should dynamically apply dark and light theme classes and persist on reload', async ({
-      page,
-    }) => {
+    test('should save selected theme to cookies and persist across reload', async ({ page }) => {
       const html = page.locator('html');
 
       // 1. Switch to Dark Mode
       await header.selectTheme('dark');
       await expect(html).toHaveClass(/dark/);
       await expect(header.themeToggleBtn).toContainText(/dark/i);
-      expect(await header.getStoredTheme()).toBe('dark');
+      expect(await header.getThemeCookie()).toBe('dark');
 
-      // Reload and verify persistence
+      // Reload and verify persistence via cookie
       await page.reload();
       await expect(html).toHaveClass(/dark/);
       await expect(header.themeToggleBtn).toContainText(/dark/i);
+      expect(await header.getThemeCookie()).toBe('dark');
 
       // 2. Switch to Light Mode
       await header.selectTheme('light');
       await expect(html).toHaveClass(/light/);
       await expect(header.themeToggleBtn).toContainText(/light/i);
+      expect(await header.getThemeCookie()).toBe('light');
     });
   });
 
@@ -96,36 +100,60 @@ test.describe('Global Header, Theme & Language Switcher', () => {
       await expect(header.languageToggleBtn).toHaveAttribute('aria-expanded', 'false');
     });
 
-    test('should switch languages between English, Russian, and Ukrainian and persist', async ({
-      page,
-    }) => {
+    test('should save selected language to cookies and persist across reload', async ({ page }) => {
       const html = page.locator('html');
-
-      // Default language is English (EN)
-      await expect(header.languageToggleBtn).toContainText('EN');
 
       // 1. Switch to Ukrainian (UA)
       await header.selectLanguage('ua');
       await expect(header.languageToggleBtn).toContainText('UA');
       await expect(html).toHaveAttribute('lang', 'uk');
-      expect(await header.getStoredLanguage()).toBe('ua');
+      expect(await header.getLanguageCookie()).toBe('ua');
 
-      // Reload and verify persistence
+      // Reload and verify persistence via cookie
       await page.reload();
       await expect(header.languageToggleBtn).toContainText('UA');
       await expect(html).toHaveAttribute('lang', 'uk');
+      expect(await header.getLanguageCookie()).toBe('ua');
 
       // 2. Switch to Russian (RU)
       await header.selectLanguage('ru');
       await expect(header.languageToggleBtn).toContainText('RU');
       await expect(html).toHaveAttribute('lang', 'ru');
-      expect(await header.getStoredLanguage()).toBe('ru');
+      expect(await header.getLanguageCookie()).toBe('ru');
 
       // 3. Switch back to English (EN)
       await header.selectLanguage('en');
       await expect(header.languageToggleBtn).toContainText('EN');
       await expect(html).toHaveAttribute('lang', 'en');
-      expect(await header.getStoredLanguage()).toBe('en');
+      expect(await header.getLanguageCookie()).toBe('en');
+    });
+  });
+
+  test.describe('Browser Auto-Detection', () => {
+    test('should auto-detect Ukrainian when browser locale is uk-UA', async ({ browser }) => {
+      // Create a fresh context with Ukrainian locale and no cookies
+      const context = await browser.newContext({ locale: 'uk-UA' });
+      const newPage = await context.newPage();
+      await newPage.goto('/');
+
+      const pageHeader = new Header(newPage);
+      await expect(pageHeader.languageToggleBtn).toContainText('UA');
+      await expect(newPage.locator('html')).toHaveAttribute('lang', 'uk');
+
+      await context.close();
+    });
+
+    test('should auto-detect Russian when browser locale is ru-RU', async ({ browser }) => {
+      // Create a fresh context with Russian locale and no cookies
+      const context = await browser.newContext({ locale: 'ru-RU' });
+      const newPage = await context.newPage();
+      await newPage.goto('/');
+
+      const pageHeader = new Header(newPage);
+      await expect(pageHeader.languageToggleBtn).toContainText('RU');
+      await expect(newPage.locator('html')).toHaveAttribute('lang', 'ru');
+
+      await context.close();
     });
   });
 });

@@ -1,102 +1,75 @@
 "use client";
 
-import React, { useEffect, useState, useRef, useSyncExternalStore } from "react";
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  useSyncExternalStore,
+} from "react";
+import { useOnClickOutside } from "@/hooks";
 
-export type LanguageCode = "en" | "ru" | "ua";
+import {
+  getStoredLanguage,
+  detectBrowserLanguage,
+  subscribeLanguage,
+  applyLanguage,
+} from "@/utils/i18n";
 
-export interface LanguageOption {
-  code: LanguageCode;
-  label: string;
-  short: string;
-}
+import { setCookie } from "@/utils/cookies";
+import { LanguageCode, LanguageOption } from "@/types/i18n";
+import { LG_COOKIE, LG_EVENT, LG_DEFAULT, LG_SUPPORTED } from "@/types/i18n";
+import { EN, RU, UA, H_UA, LANGUAGES, LG_HTML } from "@/types/i18n";
 
-export const SUPPORTED_LANGUAGES: LanguageOption[] = [
-  { code: "en", label: "English", short: "EN" },
-  { code: "ru", label: "Русский", short: "RU" },
-  { code: "ua", label: "Українська", short: "UA" },
-];
+// Re-export for backward compatibility
+export type { LanguageCode, LanguageOption };
 
-const LANGUAGE_KEY = "armor_language";
-const LANGUAGE_CHANGE_EVENT = "armor-language-change";
-
-function getStoredLanguage(): LanguageCode {
-  if (typeof window === "undefined") return "en";
-  try {
-    const stored = localStorage.getItem(LANGUAGE_KEY);
-    if (stored === "en" || stored === "ru" || stored === "ua") {
-      return stored;
-    }
-  } catch {
-    // Ignore storage access errors
-  }
-  return "en";
-}
-
-function subscribeLanguage(callback: () => void) {
-  window.addEventListener("storage", callback);
-  window.addEventListener(LANGUAGE_CHANGE_EVENT, callback);
-  return () => {
-    window.removeEventListener("storage", callback);
-    window.removeEventListener(LANGUAGE_CHANGE_EVENT, callback);
-  };
-}
-
-function applyLanguage(code: LanguageCode) {
-  if (typeof document === "undefined") return;
-  // Map UA to standard HTML lang code 'uk' if applicable
-  const htmlLang = code === "ua" ? "uk" : code;
-  document.documentElement.lang = htmlLang;
-}
+export {
+  EN,
+  RU,
+  UA,
+  H_UA,
+  LANGUAGES,
+  LG_HTML,
+  LG_SUPPORTED,
+  LG_EVENT,
+  detectBrowserLanguage,
+  getStoredLanguage,
+  applyLanguage,
+};
 
 export function LanguageToggle({ className = "" }: { className?: string }) {
   const isMounted = useSyncExternalStore(
     () => () => {},
     () => true,
-    () => false
+    () => false,
   );
 
   const currentLanguage = useSyncExternalStore(
     subscribeLanguage,
     getStoredLanguage,
-    () => "en" as LanguageCode
+    () => LG_DEFAULT,
   );
 
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close on outside click or Escape key
+  // Apply language to <html lang="..."> on mount / change
   useEffect(() => {
-    if (!isOpen) return;
+    applyLanguage(currentLanguage);
+  }, [currentLanguage]);
 
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isOpen]);
+  // Close on outside click or Escape key
+  useOnClickOutside(dropdownRef, () => setIsOpen(false), isOpen);
 
   const handleSelectLanguage = (code: LanguageCode) => {
     try {
-      localStorage.setItem(LANGUAGE_KEY, code);
+      setCookie(LG_COOKIE, code);
+      localStorage.setItem(LG_COOKIE, code);
     } catch {
       // Ignore storage access errors
     }
     applyLanguage(code);
-    window.dispatchEvent(new Event(LANGUAGE_CHANGE_EVENT));
+    window.dispatchEvent(new Event(LG_EVENT));
     setIsOpen(false);
   };
 
@@ -110,10 +83,13 @@ export function LanguageToggle({ className = "" }: { className?: string }) {
   }
 
   const selected =
-    SUPPORTED_LANGUAGES.find((l) => l.code === currentLanguage) || SUPPORTED_LANGUAGES[0];
+    LG_SUPPORTED.find((l) => l.code === currentLanguage) || LG_SUPPORTED[0];
 
   return (
-    <div className={`relative inline-block text-left ${className}`} ref={dropdownRef}>
+    <div
+      className={`relative inline-block text-left ${className}`}
+      ref={dropdownRef}
+    >
       {/* Trigger Button */}
       <button
         type="button"
@@ -139,7 +115,9 @@ export function LanguageToggle({ className = "" }: { className?: string }) {
           <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
         </svg>
 
-        <span className="text-xs font-semibold uppercase">{selected.short}</span>
+        <span className="text-xs font-semibold uppercase">
+          {selected.short}
+        </span>
 
         {/* Dropdown Chevron */}
         <svg
@@ -163,7 +141,7 @@ export function LanguageToggle({ className = "" }: { className?: string }) {
           aria-orientation="vertical"
           className="absolute right-0 mt-2 w-40 rounded-2xl border border-card-border bg-card p-1.5 shadow-xl shadow-black/15 z-50 animate-in fade-in zoom-in-95 duration-100"
         >
-          {SUPPORTED_LANGUAGES.map((lang) => {
+          {LG_SUPPORTED.map((lang) => {
             const isSelected = lang.code === currentLanguage;
             return (
               <button

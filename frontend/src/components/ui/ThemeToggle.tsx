@@ -1,42 +1,26 @@
 "use client";
 
 import React, { useEffect, useState, useRef, useSyncExternalStore } from "react";
+import { useOnClickOutside } from "@/hooks";
+import { setCookie } from "@/utils/cookies";
+import {
+  ThemeMode,
+  THEMES,
+  THEME_COOKIE_NAME,
+  THEME_CHANGE_EVENT,
+  DEFAULT_THEME,
+} from "@/types/theme";
+import {
+  getStoredTheme,
+  getSystemTheme,
+  subscribeTheme,
+  applyTheme,
+} from "@/utils/theme";
 
-export type ThemeMode = "light" | "system" | "dark";
-
-const THEME_KEY = "armor_theme";
-const THEME_CHANGE_EVENT = "armor-theme-change";
-
-function getStoredTheme(): ThemeMode {
-  if (typeof window === "undefined") return "system";
-  try {
-    const stored = localStorage.getItem(THEME_KEY);
-    if (stored === "light" || stored === "dark" || stored === "system") {
-      return stored;
-    }
-  } catch {
-    // Ignore storage access errors (e.g. disabled cookies/storage)
-  }
-  return "system";
-}
-
-function subscribeTheme(callback: () => void) {
-  window.addEventListener("storage", callback);
-  window.addEventListener(THEME_CHANGE_EVENT, callback);
-  return () => {
-    window.removeEventListener("storage", callback);
-    window.removeEventListener(THEME_CHANGE_EVENT, callback);
-  };
-}
-
-function applyTheme(mode: ThemeMode) {
-  if (typeof document === "undefined") return;
-  const root = document.documentElement;
-  root.classList.remove("light", "dark");
-  if (mode === "dark" || mode === "light") {
-    root.classList.add(mode);
-  }
-}
+// Re-export for backward compatibility
+export type { ThemeMode };
+export const THEME_KEY = THEME_COOKIE_NAME;
+export { THEMES, THEME_CHANGE_EVENT, getSystemTheme, getStoredTheme, applyTheme };
 
 export function ThemeToggle({ className = "" }: { className?: string }) {
   const isMounted = useSyncExternalStore(
@@ -48,40 +32,34 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
   const theme = useSyncExternalStore(
     subscribeTheme,
     getStoredTheme,
-    () => "system" as ThemeMode
+    () => DEFAULT_THEME
   );
 
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close on outside click or Escape key
+  // Apply theme & listen to system OS dark/light mode changes when mode is "system"
   useEffect(() => {
-    if (!isOpen) return;
+    applyTheme(theme);
 
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleSystemChange = () => {
+      if (getStoredTheme() === THEMES.SYSTEM) {
+        applyTheme(THEMES.SYSTEM);
       }
     };
 
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setIsOpen(false);
-      }
-    };
+    mediaQuery.addEventListener("change", handleSystemChange);
+    return () => mediaQuery.removeEventListener("change", handleSystemChange);
+  }, [theme]);
 
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isOpen]);
+  // Close on outside click or Escape key
+  useOnClickOutside(dropdownRef, () => setIsOpen(false), isOpen);
 
   const handleSelectTheme = (mode: ThemeMode) => {
     try {
-      localStorage.setItem(THEME_KEY, mode);
+      setCookie(THEME_COOKIE_NAME, mode);
+      localStorage.setItem(THEME_COOKIE_NAME, mode);
     } catch {
       // Ignore storage access errors
     }
@@ -111,8 +89,17 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
         className="flex items-center gap-2 h-6 px-3 py-2 rounded-xl border border-card-border bg-card hover:border-primary text-foreground transition-all shadow-sm active:scale-95"
       >
         {/* Dynamic active icon */}
-        {theme === "light" && (
-          <svg className="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        {theme === THEMES.LIGHT && (
+          <svg
+            className="w-4 h-4 text-primary"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
             <circle cx="12" cy="12" r="5" />
             <line x1="12" y1="1" x2="12" y2="3" />
             <line x1="12" y1="21" x2="12" y2="23" />
@@ -124,15 +111,33 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
             <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
           </svg>
         )}
-        {theme === "system" && (
-          <svg className="w-4 h-4 text-tech-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        {theme === THEMES.SYSTEM && (
+          <svg
+            className="w-4 h-4 text-tech-accent"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
             <rect width="20" height="14" x="2" y="3" rx="2" />
             <line x1="8" x2="16" y1="21" y2="21" />
             <line x1="12" x2="12" y1="17" y2="21" />
           </svg>
         )}
-        {theme === "dark" && (
-          <svg className="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        {theme === THEMES.DARK && (
+          <svg
+            className="w-4 h-4 text-primary"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
           </svg>
         )}
@@ -165,16 +170,25 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
           <button
             type="button"
             role="menuitemradio"
-            aria-checked={theme === "light"}
-            onClick={() => handleSelectTheme("light")}
+            aria-checked={theme === THEMES.LIGHT}
+            onClick={() => handleSelectTheme(THEMES.LIGHT)}
             className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
-              theme === "light"
+              theme === THEMES.LIGHT
                 ? "bg-primary text-primary-foreground font-bold shadow-sm"
                 : "text-foreground hover:bg-muted"
             }`}
           >
             <div className="flex items-center gap-2">
-              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <svg
+                className="w-3.5 h-3.5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
                 <circle cx="12" cy="12" r="5" />
                 <line x1="12" y1="1" x2="12" y2="3" />
                 <line x1="12" y1="21" x2="12" y2="23" />
@@ -187,8 +201,17 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
               </svg>
               <span>Light</span>
             </div>
-            {theme === "light" && (
-              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            {theme === THEMES.LIGHT && (
+              <svg
+                className="w-3.5 h-3.5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
                 <polyline points="20 6 9 17 4 12" />
               </svg>
             )}
@@ -198,24 +221,42 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
           <button
             type="button"
             role="menuitemradio"
-            aria-checked={theme === "system"}
-            onClick={() => handleSelectTheme("system")}
+            aria-checked={theme === THEMES.SYSTEM}
+            onClick={() => handleSelectTheme(THEMES.SYSTEM)}
             className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
-              theme === "system"
+              theme === THEMES.SYSTEM
                 ? "bg-primary text-primary-foreground font-bold shadow-sm"
                 : "text-foreground hover:bg-muted"
             }`}
           >
             <div className="flex items-center gap-2">
-              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <svg
+                className="w-3.5 h-3.5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
                 <rect width="20" height="14" x="2" y="3" rx="2" />
                 <line x1="8" x2="16" y1="21" y2="21" />
                 <line x1="12" x2="12" y1="17" y2="21" />
               </svg>
               <span>System</span>
             </div>
-            {theme === "system" && (
-              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            {theme === THEMES.SYSTEM && (
+              <svg
+                className="w-3.5 h-3.5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
                 <polyline points="20 6 9 17 4 12" />
               </svg>
             )}
@@ -225,22 +266,40 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
           <button
             type="button"
             role="menuitemradio"
-            aria-checked={theme === "dark"}
-            onClick={() => handleSelectTheme("dark")}
+            aria-checked={theme === THEMES.DARK}
+            onClick={() => handleSelectTheme(THEMES.DARK)}
             className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
-              theme === "dark"
+              theme === THEMES.DARK
                 ? "bg-primary text-primary-foreground font-bold shadow-sm"
                 : "text-foreground hover:bg-muted"
             }`}
           >
             <div className="flex items-center gap-2">
-              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <svg
+                className="w-3.5 h-3.5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
                 <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
               </svg>
               <span>Dark</span>
             </div>
-            {theme === "dark" && (
-              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            {theme === THEMES.DARK && (
+              <svg
+                className="w-3.5 h-3.5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
                 <polyline points="20 6 9 17 4 12" />
               </svg>
             )}

@@ -70,10 +70,18 @@ export class Header {
   }
 
   /**
-   * Retrieves the stored theme value from localStorage
+   * Retrieves the stored theme value from localStorage or cookie
    */
   async getStoredTheme(): Promise<string | null> {
     return this.page.evaluate(() => localStorage.getItem('armor_theme'));
+  }
+
+  /**
+   * Retrieves the theme cookie value from the browser context
+   */
+  async getThemeCookie(): Promise<string | undefined> {
+    const cookies = await this.page.context().cookies();
+    return cookies.find((c) => c.name === 'armor_theme')?.value;
   }
 
   /**
@@ -119,5 +127,13 @@ export class Header {
    */
   async getStoredLanguage(): Promise<string | null> {
     return this.page.evaluate(() => localStorage.getItem('armor_language'));
+  }
+
+  /**
+   * Retrieves the language cookie value from the browser context
+   */
+  async getLanguageCookie(): Promise<string | undefined> {
+    const cookies = await this.page.context().cookies();
+    return cookies.find((c) => c.name === 'armor_language')?.value;
   }
 }
