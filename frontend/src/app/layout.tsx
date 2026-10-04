@@ -1,7 +1,7 @@
 import { fontVariables } from "@/styles/fonts";
 import "./globals.css";
 
-const themeInitScript = `(function(){try{var t=localStorage.getItem("armor_theme");if(t==="dark"||t==="light"){document.documentElement.classList.add(t);}}catch(e){}})();`;
+const clientInitScript = `(function(){try{var t=localStorage.getItem("armor_theme");if(t==="dark"||t==="light"){document.documentElement.classList.add(t);}var l=localStorage.getItem("armor_language");if(l){document.documentElement.lang=(l==="ua"?"uk":l);}}catch(e){}})();`;
 
 export default function RootLayout({
   children,
@@ -18,7 +18,7 @@ export default function RootLayout({
         <title>ArmorNode</title>
         <script
           dangerouslySetInnerHTML={{
-            __html: themeInitScript,
+            __html: clientInitScript,
           }}
         />
       </head>

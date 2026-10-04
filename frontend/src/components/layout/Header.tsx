@@ -1,5 +1,5 @@
 import React from "react";
-import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { ThemeToggle, LanguageToggle } from "@/components/ui";
 
 export function Header() {
   return (
@@ -11,7 +11,8 @@ export function Header() {
           </span>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          <LanguageToggle />
           <ThemeToggle />
         </div>
       </div>

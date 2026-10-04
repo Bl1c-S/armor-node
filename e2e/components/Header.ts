@@ -10,6 +10,11 @@ export class Header {
   readonly darkOption: Locator;
   readonly systemOption: Locator;
 
+  readonly languageToggleBtn: Locator;
+  readonly langEnOption: Locator;
+  readonly langRuOption: Locator;
+  readonly langUaOption: Locator;
+
   constructor(page: Page) {
     this.page = page;
     this.root = page.locator('header');
@@ -19,6 +24,11 @@ export class Header {
     this.lightOption = page.getByRole('menuitemradio', { name: 'Light' });
     this.darkOption = page.getByRole('menuitemradio', { name: 'Dark' });
     this.systemOption = page.getByRole('menuitemradio', { name: 'System' });
+
+    this.languageToggleBtn = page.getByRole('button', { name: 'Language options menu' });
+    this.langEnOption = page.getByRole('menuitemradio', { name: /English/i });
+    this.langRuOption = page.getByRole('menuitemradio', { name: /Русский/i });
+    this.langUaOption = page.getByRole('menuitemradio', { name: /Українська/i });
   }
 
   /**
@@ -64,5 +74,50 @@ export class Header {
    */
   async getStoredTheme(): Promise<string | null> {
     return this.page.evaluate(() => localStorage.getItem('armor_theme'));
+  }
+
+  /**
+   * Opens the language dropdown if currently closed
+   */
+  async openLanguageMenu() {
+    const isExpanded = (await this.languageToggleBtn.getAttribute('aria-expanded')) === 'true';
+    if (!isExpanded) {
+      await this.languageToggleBtn.click();
+      await expect(this.themeMenu).toBeVisible();
+    }
+  }
+
+  /**
+   * Closes the language dropdown if currently open
+   */
+  async closeLanguageMenu() {
+    const isExpanded = (await this.languageToggleBtn.getAttribute('aria-expanded')) === 'true';
+    if (isExpanded) {
+      await this.languageToggleBtn.click();
+      await expect(this.themeMenu).toBeHidden();
+    }
+  }
+
+  /**
+   * Selects a given language ('en', 'ru', or 'ua')
+   */
+  async selectLanguage(lang: 'en' | 'ru' | 'ua') {
+    await this.openLanguageMenu();
+    const targetOption =
+      lang === 'en'
+        ? this.langEnOption
+        : lang === 'ru'
+        ? this.langRuOption
+        : this.langUaOption;
+
+    await targetOption.click();
+    await expect(this.themeMenu).toBeHidden();
+  }
+
+  /**
+   * Retrieves the stored language code from localStorage
+   */
+  async getStoredLanguage(): Promise<string | null> {
+    return this.page.evaluate(() => localStorage.getItem('armor_language'));
   }
 }
