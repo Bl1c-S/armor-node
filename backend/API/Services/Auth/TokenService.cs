@@ -1,4 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using API.Models.DTOs;
 using API.Options;
@@ -36,5 +36,27 @@ public class TokenService(IOptions<AuthOptions> options)
 
         var token = new JwtSecurityTokenHandler().WriteToken(jwt);
         return new ArmorToken(user.Id, token, name);
+    }
+
+    public ClaimsPrincipal? ValidateToken(string token)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        try
+        {
+            var principal = tokenHandler.ValidateToken(token, new TokenValidationParameters
+            {
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = _options.GetSymmetricSecurityKey()
+            }, out _);
+
+            return principal;
+        }
+        catch
+        {
+            return null;
+        }
     }
 }

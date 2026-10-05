@@ -33,6 +33,16 @@ public static class ConfigureWebApplicationBuilderExtensions
             var authOptions = GetOptions<AuthOptions>("Auth", cfg);
             services.ConfigureAuthentication(authOptions);
 
+            services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(policy =>
+                {
+                    policy.AllowAnyOrigin()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                });
+            });
+
             services.AddControllers(options => { options.Conventions.Add(new ApiPrefixConvention("api")); });
             services.AddOpenApi();
         }

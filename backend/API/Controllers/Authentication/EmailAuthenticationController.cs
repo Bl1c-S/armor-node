@@ -1,5 +1,7 @@
-﻿using API.Models.Requests;
+using System.Security.Claims;
+using API.Models.Requests;
 using API.Services.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 
@@ -50,5 +52,37 @@ public class EmailAuthenticationController(EmailAuthService authService, TokenSe
             Log.Error(ex, "Registration handling failed by the email: {Email}", request.Email);
             return Problem();
         }
+    }
+
+    [HttpPost("refresh")]
+    public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest request)
+    {
+        if (!request.IsValidRequest())
+            return BadRequest("Invalid refresh token request.");
+
+        var principal = tokenService.ValidateToken(request.RefreshToken);
+        if (principal is null) return Unauthorized("Invalid or expired refresh token.");
+
+        var email = principal.FindFirst(ClaimTypes.Name)?.Value;
+        if (string.IsNullOrEmpty(email)) return Unauthorized();
+
+        var (isFound, user) = await authService.GetUserByEmail(email);
+        if (!isFound || user is null) return Unauthorized();
+
+        var tokens = tokenService.Create(user);
+        return Ok(new { tokens });
+    }
+
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<IActionResult> Me()
+    {
+        var email = User.FindFirst(ClaimTypes.Name)?.Value;
+        if (string.IsNullOrEmpty(email)) return Unauthorized();
+
+        var (isFound, user) = await authService.GetUserByEmail(email);
+        if (!isFound || user is null) return Unauthorized();
+
+        return Ok(new { id = user.Id, email = user.Email, userName = user.UserName });
     }
 }

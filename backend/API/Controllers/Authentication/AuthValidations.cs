@@ -1,4 +1,4 @@
-﻿using API.Models.Requests;
+using API.Models.Requests;
 
 namespace API.Controllers.Authentication;
 
@@ -16,5 +16,10 @@ public static class AuthValidations
         if (string.IsNullOrEmpty(byEmailRequest.Email) || string.IsNullOrEmpty(byEmailRequest.Password))
             return false;
         return true;
+    }
+
+    public static bool IsValidRequest(this RefreshTokenRequest request)
+    {
+        return !string.IsNullOrWhiteSpace(request.RefreshToken);
     }
 }

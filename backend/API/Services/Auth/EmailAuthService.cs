@@ -1,4 +1,4 @@
-﻿using Infrastructure.Model;
+using Infrastructure.Model;
 using Microsoft.AspNetCore.Identity;
 
 namespace API.Services.Auth;
@@ -36,5 +36,17 @@ public class EmailAuthService(UserManager<ArmorUser> userManager)
             return (true, user);
 
         return (false, null);
+    }
+
+    public async Task<(bool isFound, ArmorUser? user)> GetUserByEmail(string email)
+    {
+        var user = await userManager.FindByEmailAsync(email);
+        return (user != null, user);
+    }
+
+    public async Task<(bool isFound, ArmorUser? user)> GetUserById(string id)
+    {
+        var user = await userManager.FindByIdAsync(id);
+        return (user != null, user);
     }
 }
