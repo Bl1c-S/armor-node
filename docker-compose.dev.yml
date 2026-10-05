@@ -4,7 +4,7 @@ services:
     command: npm run dev
     environment:
       - NODE_ENV=development
-      - API_URL=http://localhost:8080
+      - API_URL=http://api:8080
     volumes:
       - ./frontend:/app
       - /app/node_modules
