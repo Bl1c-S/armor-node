@@ -4,6 +4,7 @@ import { THEME_COOKIE_NAME } from "@/types/theme";
 import { LG_COOKIE } from "@/types/i18n";
 import { resolveThemeClass } from "@/utils/theme";
 import { resolveServerLanguage } from "@/utils/i18n";
+import { UserProvider } from "@/context";
 import "./globals.css";
 
 export default async function RootLayout({
@@ -33,7 +34,7 @@ export default async function RootLayout({
         <title>ArmorNode</title>
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground font-sans">
-        {children}
+        <UserProvider>{children}</UserProvider>
       </body>
     </html>
   );
