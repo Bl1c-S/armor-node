@@ -27,6 +27,7 @@ export default async function RootLayout({
   return (
     <html
       lang={lang}
+      data-scroll-behavior="smooth"
       suppressHydrationWarning
       className={`${themeClass} ${fontVariables} h-full antialiased`.trim()}
     >
