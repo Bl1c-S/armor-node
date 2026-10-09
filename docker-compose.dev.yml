@@ -1,11 +1,16 @@
 # Development override: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
 services:
   frontend:
+    build:
+      target: builder
     command: npm run dev
     environment:
       - NODE_ENV=development
-      - API_URL=http://api:8080
     volumes:
       - ./frontend:/app
       - /app/node_modules
       - /app/.next
+  api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-203177541336-v77jl3vhbu8kasbmj1n9ga2s9kufbnfs.apps.googleusercontent.com}

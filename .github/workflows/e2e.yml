@@ -33,6 +33,8 @@ jobs:
 
       - name: Run Solution E2E Tests
         run: npm run test:e2e
+        env:
+          NEXT_PUBLIC_GOOGLE_CLIENT_ID: "mock-client-id-for-ci"
 
       - name: Upload Playwright Report
         uses: actions/upload-artifact@v4
