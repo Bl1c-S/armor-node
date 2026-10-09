@@ -22,4 +22,9 @@ public static class AuthValidations
     {
         return !string.IsNullOrWhiteSpace(request.RefreshToken);
     }
+
+    public static bool IsValidRequest(this GoogleAuthRequest request)
+    {
+        return !string.IsNullOrWhiteSpace(request.Code) || !string.IsNullOrWhiteSpace(request.Token);
+    }
 }

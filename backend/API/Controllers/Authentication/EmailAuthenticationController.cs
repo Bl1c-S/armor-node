@@ -63,7 +63,7 @@ public class EmailAuthenticationController(EmailAuthService authService, TokenSe
         var principal = tokenService.ValidateToken(request.RefreshToken);
         if (principal is null) return Unauthorized("Invalid or expired refresh token.");
 
-        var email = principal.FindFirst(ClaimTypes.Name)?.Value;
+        var email = principal.FindFirst(ClaimTypes.Email)?.Value;
         if (string.IsNullOrEmpty(email)) return Unauthorized();
 
         var (isFound, user) = await authService.GetUserByEmail(email);
@@ -77,7 +77,7 @@ public class EmailAuthenticationController(EmailAuthService authService, TokenSe
     [HttpGet("me")]
     public async Task<IActionResult> Me()
     {
-        var email = User.FindFirst(ClaimTypes.Name)?.Value;
+        var email = User.FindFirst(ClaimTypes.Email)?.Value;
         if (string.IsNullOrEmpty(email)) return Unauthorized();
 
         var (isFound, user) = await authService.GetUserByEmail(email);

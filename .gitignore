@@ -513,3 +513,5 @@ next-env.d.ts
 **/playwright-report/
 **/test-results/
 
+
+appsettings.dev.json

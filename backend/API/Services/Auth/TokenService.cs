@@ -24,7 +24,7 @@ public class TokenService(IOptions<AuthOptions> options)
 
     private ArmorToken Create(ArmorUser user, TimeSpan lifeTime, string name = "access_token")
     {
-        var claims = new List<Claim> { new(ClaimTypes.Name, user.UserName) };
+        var claims = new List<Claim> { new(ClaimTypes.Name, user.UserName), new(ClaimTypes.Email, user.Email) };
         
         var credentials = new SigningCredentials(_options.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256);
 

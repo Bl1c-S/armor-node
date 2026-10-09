@@ -9,7 +9,7 @@ var app = builder.Build();
 app.ApplyMigrations();
 app.ConfigureDevelopment();
 
-app.UseHttpsRedirection();
+
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();

@@ -1,4 +1,4 @@
-using API.Conventions;
+﻿using API.Conventions;
 using API.Options;
 using API.Services.Auth;
 using Infrastructure.Data;
@@ -43,6 +43,7 @@ public static class ConfigureWebApplicationBuilderExtensions
                 });
             });
 
+            services.AddHttpClient();
             services.AddControllers(options => { options.Conventions.Add(new ApiPrefixConvention("api")); });
             services.AddOpenApi();
         }
@@ -94,6 +95,7 @@ public static class ConfigureWebApplicationBuilderExtensions
         {
             services.AddScoped<TokenService>();
             services.AddScoped<EmailAuthService>();
+            services.AddScoped<GoogleAuthService>();
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(op =>
                 {
