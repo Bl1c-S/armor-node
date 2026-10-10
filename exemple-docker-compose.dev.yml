@@ -1,0 +1,17 @@
+include:
+  - docker-compose.yml
+
+services:
+  frontend:
+    build:
+      target: builder
+    command: npm run dev
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+  api:
+    environment:
+# local testing overrides

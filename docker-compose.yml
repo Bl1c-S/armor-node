@@ -9,7 +9,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d armor-db"]
       interval: 2s
@@ -19,13 +19,13 @@ services:
   api:
     build:
       context: ./backend
-      dockerfile: API/Docker/Dockerfile
+      dockerfile: API/Dockerfile
     container_name: armor-api
     ports:
       - "8080:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - Connection__PSQL=Host=psql;Port=5432;Database=${PSQL_DB:-armor-db};Username=${PSQL_USER:-postgres};Password=${PSQL_PASSWORD:-yourpassword};
+      - Connection__PSQL=Host=psql;Port=5432;Database=${POSTGRES_DB:-armor-db};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-yourpassword};
       - Auth__GoogleClientId=${GOOGLE_CLIENT_ID:-id.apps.googleusercontent.com}
       - Auth__GoogleClientSecret=${GOOGLE_CLIENT_SECRET:-}
     depends_on:
@@ -45,8 +45,7 @@ services:
       - NODE_ENV=production
       - API_URL=http://api:8080
     depends_on:
-      api:
-        condition: service_healthy
+      - api
 
 volumes:
   pgdata:
